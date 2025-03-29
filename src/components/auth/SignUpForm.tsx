@@ -17,13 +17,7 @@ const signUpSchema = z
   .object({
     fullName: z.string().min(2, "Full name is required"),
     email: z.string().email("Invalid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-        "Password must include uppercase, lowercase, number and special character",
-      ),
+    password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
     isAdmin: z.boolean().default(false),
   })

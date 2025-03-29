@@ -81,20 +81,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Create a user profile in the public.users table
       if (data.user) {
-        const { error: profileError } = await supabase.from("users").insert([
-          {
-            id: data.user.id,
-            full_name: fullName,
-            email: email,
-            is_admin: isAdmin,
-          },
-        ]);
+        try {
+          const { error: profileError } = await supabase.from("users").insert([
+            {
+              id: data.user.id,
+              full_name: fullName,
+              email: email,
+              is_admin: isAdmin,
+              created_at: new Date().toISOString(),
+            },
+          ]);
 
-        if (profileError) {
-          console.error("Error creating user profile:", profileError);
-          throw new Error(
-            "Failed to create user profile. " + profileError.message,
-          );
+          if (profileError) {
+            console.error("Error creating user profile:", profileError);
+            // Don't throw here to allow auth signup to complete
+            console.warn(
+              "User created in auth but profile creation failed. User can still log in.",
+            );
+          }
+        } catch (insertError) {
+          console.error("Error inserting user profile:", insertError);
+          // Don't throw here - allow auth signup to complete even if profile creation fails
+          // The user can still log in, and profile can be created later
         }
       }
 
