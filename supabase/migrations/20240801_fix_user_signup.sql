@@ -32,5 +32,15 @@ CREATE POLICY "Admins can update all profiles"
   ON public.users FOR UPDATE
   USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND is_admin = TRUE));
 
--- Enable realtime
-alter publication supabase_realtime add table public.users;
+-- Enable realtime (only if not already enabled)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+    AND schemaname = 'public' 
+    AND tablename = 'users'
+  ) THEN
+    alter publication supabase_realtime add table public.users;
+  END IF;
+END$$;
