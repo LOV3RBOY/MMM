@@ -54,16 +54,29 @@ export default function SignUpForm() {
   const onSubmit = async (data: SignUpFormData) => {
     try {
       setIsSubmitting(true);
-      await signUp(data.email, data.password, data.fullName, data.isAdmin);
+      console.log("SignUpForm - Starting signup process with data:", {
+        email: data.email,
+        fullName: data.fullName,
+        isAdmin: data.isAdmin,
+      });
+
+      const result = await signUp(
+        data.email,
+        data.password,
+        data.fullName,
+        data.isAdmin,
+      );
+      console.log("SignUpForm - Signup result:", result);
 
       toast({
         title: "Account created",
-        description: "Your account has been created successfully.",
+        description:
+          "Your account has been created successfully. Please check your email for verification.",
       });
 
       navigate("/login");
     } catch (error: any) {
-      console.error("SignUp error:", error);
+      console.error("SignUpForm - SignUp error:", error);
       toast({
         title: "Error",
         description:

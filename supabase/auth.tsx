@@ -68,37 +68,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn("Setup check failed, continuing with signup", setupError);
       }
 
+      // Log the signup attempt for debugging
+      console.log("Attempting signup with:", { email, fullName, isAdmin });
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName,
+            name: fullName.split(" ")[0], // Add name field
             is_admin: isAdmin ? true : false, // Ensure boolean value for is_admin
           },
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase auth.signUp error:", error);
+        throw error;
+      }
+
+      console.log("Signup successful, user data:", data);
 
       // The user profile in public.users table will be created automatically by the trigger
       // We don't need to manually create it here anymore
 
       // As a fallback, try to create the user record directly if needed
       try {
+        if (!data.user?.id) {
+          console.warn(
+            "No user ID returned from signup, skipping fallback creation",
+          );
+          return data;
+        }
+
+        console.log("Attempting fallback user creation with ID:", data.user.id);
+
         const { error: insertError } = await supabase.from("users").upsert(
           {
-            id: data.user?.id,
+            id: data.user.id,
+            user_id: data.user.id,
             email: email,
+            name: fullName.split(" ")[0],
             full_name: fullName,
             is_admin: isAdmin,
             created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           },
           { onConflict: "id" },
         );
 
         if (insertError) {
           console.warn("Fallback user creation had an error:", insertError);
+        } else {
+          console.log("Fallback user creation successful");
         }
       } catch (fallbackError) {
         console.warn("Fallback user creation failed:", fallbackError);
