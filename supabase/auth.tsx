@@ -65,17 +65,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fullName: string,
     isAdmin: boolean = false,
   ) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          is_admin: isAdmin ? true : false, // Ensure boolean value for is_admin
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            is_admin: isAdmin ? true : false, // Ensure boolean value for is_admin
+          },
         },
-      },
-    });
-    if (error) throw error;
+      });
+
+      if (error) throw error;
+
+      // Create a user profile in the public.users table
+      if (data.user) {
+        const { error: profileError } = await supabase.from("users").insert([
+          {
+            id: data.user.id,
+            full_name: fullName,
+            email: email,
+            is_admin: isAdmin,
+          },
+        ]);
+
+        if (profileError) {
+          console.error("Error creating user profile:", profileError);
+          throw new Error(
+            "Failed to create user profile. " + profileError.message,
+          );
+        }
+      }
+
+      return data;
+    } catch (error) {
+      console.error("SignUp error:", error);
+      throw error;
+    }
   };
 
   const signIn = async (email: string, password: string) => {
