@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ModelList from "./ModelList";
+import FixDatabaseButton from "./FixDatabaseButton";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -32,13 +33,16 @@ const AdminDashboard = () => {
             <h1 className="text-2xl font-semibold text-gray-900">
               Model Management
             </h1>
-            <Button
-              onClick={handleAddModel}
-              className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4 h-9 shadow-sm transition-colors flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add New Model
-            </Button>
+            <div className="flex gap-3">
+              <FixDatabaseButton />
+              <Button
+                onClick={handleAddModel}
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4 h-9 shadow-sm transition-colors flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add New Model
+              </Button>
+            </div>
           </div>
           <div className="container mx-auto p-6 space-y-8">
             {activeSection === "Models" && <ModelList />}
