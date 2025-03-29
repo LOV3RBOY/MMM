@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     // SQL to fix all Supabase components
     const sql = `
       -- 1. Fix users table structure
-      DO $$
+      DO $BODY$
       BEGIN
         -- Add missing columns if they don't exist
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'is_admin') THEN
@@ -32,10 +32,10 @@ Deno.serve(async (req) => {
         -- Ensure token_identifier is nullable (for compatibility)
         ALTER TABLE public.users ALTER COLUMN token_identifier DROP NOT NULL;
       END
-      $$;
+      $BODY$;
 
       -- 2. Create storage buckets if they don't exist
-      DO $$
+      DO $BODY$
       BEGIN
         -- Create model-images bucket
         INSERT INTO storage.buckets (id, name, public)
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
         VALUES ('model-documents', 'model-documents', false)
         ON CONFLICT (id) DO NOTHING;
       END
-      $$;
+      $BODY$;
 
       -- 3. Fix user triggers
       CREATE OR REPLACE FUNCTION public.handle_new_user()

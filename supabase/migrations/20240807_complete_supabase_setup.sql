@@ -170,7 +170,8 @@ CREATE TRIGGER on_auth_user_updated
   FOR EACH ROW EXECUTE FUNCTION public.handle_user_update();
 
 -- 7. Enable realtime for models table
-BEGIN;
+DO $
+BEGIN
   -- Check if the table is already in the publication
   IF NOT EXISTS (
     SELECT 1 FROM pg_publication_tables 
@@ -181,7 +182,8 @@ BEGIN;
     -- Add the table to the publication
     ALTER PUBLICATION supabase_realtime ADD TABLE public.models;
   END IF;
-COMMIT;
+END
+$;
 
 -- 8. Fix users table RLS
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
