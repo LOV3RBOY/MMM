@@ -1,5 +1,9 @@
 import { supabase } from "../../supabase/supabase";
 
+/**
+ * Fixes all database policies and setup issues
+ * @returns Object with success status and data/error
+ */
 export async function fixDatabasePolicies() {
   try {
     // First try complete setup
@@ -18,6 +22,7 @@ export async function fixDatabasePolicies() {
       }
     } catch (completeSetupError) {
       console.warn("Complete setup failed:", completeSetupError);
+      // Continue with other fixes even if this fails
     }
 
     // Fallback to individual fixes

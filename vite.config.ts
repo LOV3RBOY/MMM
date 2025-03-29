@@ -11,7 +11,23 @@ if (process.env.TEMPO === "true") {
 }
 
 // https://vitejs.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
+  // Enable build optimizations
+  build: {
+    minify: true,
+    cssMinify: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          ui: ["@/components/ui"],
+        },
+      },
+    },
+    sourcemap: false,
+    chunkSizeWarningLimit: 1000,
+  },
   base:
     process.env.NODE_ENV === "development"
       ? "/"
