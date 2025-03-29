@@ -12,6 +12,7 @@ import Dashboard from "@/components/pages/dashboard";
 import Success from "@/components/pages/success";
 import LoginForm from "@/components/auth/LoginForm";
 import SignUpForm from "@/components/auth/SignUpForm";
+import TestAccountCreator from "@/components/auth/TestAccountCreator";
 
 // Admin
 import AdminDashboard from "@/components/admin/AdminDashboard";
@@ -46,6 +47,14 @@ function App() {
               <RouteGuard>
                 <SignUpForm />
               </RouteGuard>
+            }
+          />
+          <Route
+            path="/test-account"
+            element={
+              <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
+                <TestAccountCreator />
+              </div>
             }
           />
 
