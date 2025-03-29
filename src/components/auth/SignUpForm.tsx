@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Eye, EyeOff } from "lucide-react";
+import { supabase } from "../../../supabase/supabase";
 
 const signUpSchema = z
   .object({
@@ -60,13 +61,38 @@ export default function SignUpForm() {
         isAdmin: data.isAdmin,
       });
 
-      const result = await signUp(
-        data.email,
-        data.password,
-        data.fullName,
-        data.isAdmin,
-      );
-      console.log("SignUpForm - Signup result:", result);
+      // Try using the edge function as a fallback if regular signup fails
+      try {
+        const result = await signUp(
+          data.email,
+          data.password,
+          data.fullName,
+          data.isAdmin,
+        );
+        console.log("SignUpForm - Signup result:", result);
+      } catch (signupError) {
+        console.error(
+          "Regular signup failed, trying edge function:",
+          signupError,
+        );
+
+        // Try the edge function approach
+        const { data: edgeData, error: edgeError } =
+          await supabase.functions.invoke(
+            "supabase-functions-create-test-user",
+            {
+              body: {
+                email: data.email,
+                password: data.password,
+                fullName: data.fullName,
+                isAdmin: data.isAdmin,
+              },
+            },
+          );
+
+        if (edgeError) throw edgeError;
+        console.log("Edge function signup result:", edgeData);
+      }
 
       toast({
         title: "Account created",
