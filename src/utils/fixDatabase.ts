@@ -2,7 +2,24 @@ import { supabase } from "../../supabase/supabase";
 
 export async function fixDatabasePolicies() {
   try {
-    // First try using the edge function
+    // First try fixing user creation
+    try {
+      const { data: userCreationData, error: userCreationError } =
+        await supabase.functions.invoke("supabase-functions-fix-user-creation");
+
+      if (!userCreationError) {
+        console.log(
+          "User creation fixed successfully via edge function:",
+          userCreationData,
+        );
+      } else {
+        console.warn("Error fixing user creation:", userCreationError);
+      }
+    } catch (userCreationError) {
+      console.warn("User creation fix failed:", userCreationError);
+    }
+
+    // Then try fixing RLS policies
     try {
       const { data, error } = await supabase.functions.invoke(
         "supabase-functions-fix-rls-policies",
