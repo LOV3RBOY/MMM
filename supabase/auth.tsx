@@ -79,32 +79,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) throw error;
 
-      // Create a user profile in the public.users table
-      if (data.user) {
-        try {
-          const { error: profileError } = await supabase.from("users").insert([
-            {
-              id: data.user.id,
-              full_name: fullName,
-              email: email,
-              is_admin: isAdmin,
-              created_at: new Date().toISOString(),
-            },
-          ]);
-
-          if (profileError) {
-            console.error("Error creating user profile:", profileError);
-            // Don't throw here to allow auth signup to complete
-            console.warn(
-              "User created in auth but profile creation failed. User can still log in.",
-            );
-          }
-        } catch (insertError) {
-          console.error("Error inserting user profile:", insertError);
-          // Don't throw here - allow auth signup to complete even if profile creation fails
-          // The user can still log in, and profile can be created later
-        }
-      }
+      // The user profile in public.users table will be created automatically by the trigger
+      // We don't need to manually create it here anymore
 
       return data;
     } catch (error) {
@@ -135,10 +111,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
+// Export as a variable reference for better HMR compatibility
+const useAuthHook = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}
+};
+
+export { useAuthHook as useAuth };
