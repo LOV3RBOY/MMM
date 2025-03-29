@@ -66,6 +66,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin: boolean = false,
   ) => {
     try {
+      // First ensure database is properly set up
+      try {
+        await supabase.functions.invoke("supabase-functions-complete-setup");
+      } catch (setupError) {
+        console.warn("Setup check failed, continuing with signup", setupError);
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -81,6 +88,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // The user profile in public.users table will be created automatically by the trigger
       // We don't need to manually create it here anymore
+
+      // As a fallback, try to create the user record directly if needed
+      try {
+        const { error: insertError } = await supabase.from("users").upsert(
+          {
+            id: data.user?.id,
+            email: email,
+            full_name: fullName,
+            is_admin: isAdmin,
+            created_at: new Date().toISOString(),
+          },
+          { onConflict: "id" },
+        );
+
+        if (insertError) {
+          console.warn("Fallback user creation had an error:", insertError);
+        }
+      } catch (fallbackError) {
+        console.warn("Fallback user creation failed:", fallbackError);
+      }
 
       return data;
     } catch (error) {

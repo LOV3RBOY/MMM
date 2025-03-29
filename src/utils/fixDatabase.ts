@@ -2,7 +2,26 @@ import { supabase } from "../../supabase/supabase";
 
 export async function fixDatabasePolicies() {
   try {
-    // First try fixing user creation
+    // First try complete setup
+    try {
+      const { data: completeSetupData, error: completeSetupError } =
+        await supabase.functions.invoke("supabase-functions-complete-setup");
+
+      if (!completeSetupError) {
+        console.log(
+          "Complete Supabase setup successful via edge function:",
+          completeSetupData,
+        );
+        return { success: true, data: completeSetupData };
+      } else {
+        console.warn("Error in complete setup:", completeSetupError);
+      }
+    } catch (completeSetupError) {
+      console.warn("Complete setup failed:", completeSetupError);
+    }
+
+    // Fallback to individual fixes
+    // Try fixing user creation
     try {
       const { data: userCreationData, error: userCreationError } =
         await supabase.functions.invoke("supabase-functions-fix-user-creation");
