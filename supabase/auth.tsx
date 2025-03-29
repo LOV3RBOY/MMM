@@ -71,33 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Log the signup attempt for debugging
       console.log("Attempting signup with:", { email, fullName, isAdmin });
 
-      // Try direct admin API approach first
-      try {
-        const { data: adminData, error: adminError } =
-          await supabase.functions.invoke(
-            "supabase-functions-create-test-user",
-            {
-              body: {
-                email,
-                password,
-                fullName,
-                isAdmin,
-              },
-            },
-          );
-
-        if (!adminError) {
-          console.log("Admin API signup successful:", adminData);
-          return adminData;
-        }
-
-        console.warn(
-          "Admin API signup failed, trying regular signup:",
-          adminError,
-        );
-      } catch (adminApiError) {
-        console.warn("Admin API approach failed:", adminApiError);
-      }
+      // Skip edge function approach and go straight to regular signup
 
       // Fall back to regular signup
       const { data, error } = await supabase.auth.signUp({

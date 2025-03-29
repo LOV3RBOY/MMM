@@ -61,38 +61,14 @@ export default function SignUpForm() {
         isAdmin: data.isAdmin,
       });
 
-      // Try using the edge function as a fallback if regular signup fails
-      try {
-        const result = await signUp(
-          data.email,
-          data.password,
-          data.fullName,
-          data.isAdmin,
-        );
-        console.log("SignUpForm - Signup result:", result);
-      } catch (signupError) {
-        console.error(
-          "Regular signup failed, trying edge function:",
-          signupError,
-        );
-
-        // Try the edge function approach
-        const { data: edgeData, error: edgeError } =
-          await supabase.functions.invoke(
-            "supabase-functions-create-test-user",
-            {
-              body: {
-                email: data.email,
-                password: data.password,
-                fullName: data.fullName,
-                isAdmin: data.isAdmin,
-              },
-            },
-          );
-
-        if (edgeError) throw edgeError;
-        console.log("Edge function signup result:", edgeData);
-      }
+      // Use regular signup without edge function fallback
+      const result = await signUp(
+        data.email,
+        data.password,
+        data.fullName,
+        data.isAdmin,
+      );
+      console.log("SignUpForm - Signup result:", result);
 
       toast({
         title: "Account created",
